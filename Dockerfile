@@ -1,39 +1,13 @@
-name: Home Designer CI
+FROM python:3.8
 
-on:
-  push:
-    branches:
-      - main
+WORKDIR /app
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+COPY . /app
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+RUN pip install --no-cache-dir -r requirements.txt
 
-    - name: Build and test
-      run: |
-        docker build -t home-designer .
-        docker run home-designer python -m unittest discover
+EXPOSE 80
 
-    - name: Push Docker image to Docker Hub
-      if: success()
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: |
-          latest
-          ${{ github.sha }}
+ENV NAME HomeDesigner
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-    - name: Deploy to production
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-        # Add deployment steps here
-        echo "Deploying to production..."
+CMD ["python", "home_designer.py"]
